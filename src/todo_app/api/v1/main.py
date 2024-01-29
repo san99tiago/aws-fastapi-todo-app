@@ -1,5 +1,5 @@
 ###############################################################################
-# Entrypoint for the Investments Portfolio Tracker Backend Core Functionalities
+# Entrypoint for the API that uses "Mangum" as a wrapper for API-GW integration
 ###############################################################################
 
 # External imports

@@ -18,7 +18,7 @@ logger = Logger(
 router = APIRouter()
 
 
-@router.get("/todos/{user_email}", tags=["todos"])
+@router.get("/todos", tags=["todos"])
 async def read_all_todos(
     user_email: str,
     correlation_id: Annotated[str | None, Header()] = uuid4(),
@@ -29,9 +29,48 @@ async def read_all_todos(
 
         # TODO: add actual database connectivity for to-dos
         result = [
-            {"message": "todo1", "done": "no"},
-            {"message": "todo2", "done": "yes"},
+            {
+                "id": "dummy-id-1",
+                "title": "todo1",
+                "done": "no",
+                "category": "Personal",
+                "is_closed": "no",
+            },
+            {
+                "id": "dummy-id-2",
+                "title": "todo2",
+                "done": "yes",
+                "category": "Personal",
+                "is_closed": "no",
+            },
         ]
+
+        logger.info("Finished read_all_todos() successfully")
+        return result
+
+    except Exception as e:
+        logger.error(f"Error in read_all_todos(): {e}")
+        raise e
+
+
+@router.get("/todos/{todo_id}", tags=["todos"])
+async def read_all_todos(
+    user_email: str,
+    todo_id: str,
+    correlation_id: Annotated[str | None, Header()] = uuid4(),
+):
+    try:
+        logger.append_keys(correlation_id=correlation_id, user_email=user_email)
+        logger.info("Starting todos handler for read_all_todos()")
+
+        # TODO: add actual database connectivity for to-dos
+        result = {
+            "id": todo_id,
+            "title": "Some message",
+            "done": "no",
+            "category": "Personal",
+            "is_closed": "no",
+        }
 
         logger.info("Finished read_all_todos() successfully")
         return result
@@ -56,7 +95,7 @@ async def create_todo(
         logger.info("Starting todos handler for create_todo()")
 
         # TODO: add actual database connectivity for to-dos
-        result = {"Message": "TODO was created successfully"}
+        result = {"title": "TODO was created successfully"}
 
         logger.info("Finished create_todo() successfully")
         return result

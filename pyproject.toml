@@ -30,7 +30,7 @@ pydantic = "^2.5.3"
 minversion = "6.0"
 pythonpath = [
     "cdk",
-    "src/lambdas",
+    "src",
 ]
 
 [build-system]

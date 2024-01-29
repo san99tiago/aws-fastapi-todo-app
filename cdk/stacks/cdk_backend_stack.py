@@ -79,14 +79,14 @@ class BackendStack(Stack):
         # Layer for "LambdaPowerTools" (for logging, traces, observability, etc)
         self.lambda_layer_powertools = aws_lambda.LayerVersion.from_layer_version_arn(
             self,
-            id="LambdaLayer-powertools",
+            "Layer-powertools",
             layer_version_arn=f"arn:aws:lambda:{self.region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:59",
         )
 
-        # Layer for "common" Python requirements (pydantic, ...)
+        # Layer for "common" Python requirements (fastapi, pydantic, ...)
         self.lambda_layer_common = aws_lambda.LayerVersion(
             self,
-            id="LambdaLayer-common",
+            "Layer-common",
             code=aws_lambda.Code.from_asset("lambda-layers/common/modules"),
             compatible_runtimes=[
                 aws_lambda.Runtime.PYTHON_3_11,
@@ -110,7 +110,7 @@ class BackendStack(Stack):
         # Lambda Function for managing CRUD operations on "TODOs"
         self.lambda_todo_app: aws_lambda.Function = aws_lambda.Function(
             self,
-            id="Lambda-Todos",
+            "Lambda-Todos",
             runtime=aws_lambda.Runtime.PYTHON_3_11,
             handler="todo_app/api/v1/main.handler",
             code=aws_lambda.Code.from_asset(PATH_TO_LAMBDA_FUNCTION_FOLDER),
