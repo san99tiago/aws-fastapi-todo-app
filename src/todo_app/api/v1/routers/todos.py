@@ -54,14 +54,14 @@ async def read_all_todos(
 
 
 @router.get("/todos/{todo_id}", tags=["todos"])
-async def read_all_todos(
+async def read_todo_item(
     user_email: str,
     todo_id: str,
     correlation_id: Annotated[str | None, Header()] = uuid4(),
 ):
     try:
         logger.append_keys(correlation_id=correlation_id, user_email=user_email)
-        logger.info("Starting todos handler for read_all_todos()")
+        logger.info("Starting todos handler for read_todo_item()")
 
         # TODO: add actual database connectivity for to-dos
         result = {
@@ -72,11 +72,11 @@ async def read_all_todos(
             "is_closed": "no",
         }
 
-        logger.info("Finished read_all_todos() successfully")
+        logger.info("Finished read_todo_item() successfully")
         return result
 
     except Exception as e:
-        logger.error(f"Error in read_all_todos(): {e}")
+        logger.error(f"Error in read_todo_item(): {e}")
         raise e
 
 

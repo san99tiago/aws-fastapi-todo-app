@@ -27,7 +27,7 @@ mangum = "^0.17.0"
 pydantic = "^2.5.3"
 
 [tool.pytest.ini_options]
-minversion = "6.0"
+minversion = "7.0"
 pythonpath = [
     "cdk",
     "src",
