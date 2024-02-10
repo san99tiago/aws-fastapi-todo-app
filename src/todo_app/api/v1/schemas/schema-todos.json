@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "description": "Email of the user",
+      "type": "string",
+      "format": "email"
+    },
+    "todo_title": {
+      "description": "Title for the TODO element",
+      "type": "string"
+    },
+    "todo_details": {
+      "description": "Details for the TODO element (max length 256 characters)",
+      "type": "string",
+      "maxLength": 256
+    },
+    "todo_date": {
+      "description": "Date to have the TODO done",
+      "type": "string",
+      "format": "date"
+    },
+    "is_done": {
+      "description": "Indicates wether the TODO is done",
+      "type": "boolean"
+    }
+  },
+  "required": ["user_email", "todo_title", "todo_date"],
+  "additionalProperties": false
+}

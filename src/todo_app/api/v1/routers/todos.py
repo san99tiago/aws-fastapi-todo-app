@@ -7,7 +7,11 @@ from fastapi import APIRouter, Header
 from aws_lambda_powertools import Logger
 
 # Own imports
-# TODO: add own imports when src code grows (schemas, models, database, validations, etc...)
+from todo_app.api.v1.schemas.schema import Schema
+from todo_app.api.v1.services.exceptions import SchemaValidationException
+from todo_app.api.v1.services.validator import validate_json
+from todo_app.common.enums import JSONSchemaType
+
 
 logger = Logger(
     service="todo-app",
@@ -82,16 +86,21 @@ async def read_todo_item(
 
 @router.post("/todos", tags=["todos"])
 async def create_todo(
-    user_details: dict,
+    todo_details: dict,
     correlation_id: Annotated[str | None, Header()] = uuid4(),
 ):
     try:
         # Inject additional keys to the logger for cross-referencing logs
-        user_email = user_details.get("user_email")
+        user_email = todo_details.get("user_email")
         logger.append_keys(correlation_id=correlation_id, user_email=user_email)
 
-        # TODO: Add payload/schema validation of todo element
-
+        # Validate payload with JSON-Schema
+        users_schema = Schema(JSONSchemaType.TODOS, logger=logger).get_schema()
+        validation_result = validate_json(
+            data=todo_details, json_schema=users_schema, logger=logger
+        )
+        if isinstance(validation_result, Exception):
+            raise SchemaValidationException(todo_details, validation_result)
         logger.info("Starting todos handler for create_todo()")
 
         # TODO: add actual database connectivity for to-dos
