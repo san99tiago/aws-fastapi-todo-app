@@ -8,3 +8,13 @@ class JSONSchemaType(Enum):
     """
 
     TODOS = "schema-todos.json"
+
+
+class DDBPrefixes(Enum):
+    """
+    Enumerations for DynamoDB Partition Keys and Sort Keys for TODO items and related information to
+    centralize and simplify the usage.
+    """
+
+    PK_USER = "USER#"
+    SK_TODO_DATA = "TODO#"
