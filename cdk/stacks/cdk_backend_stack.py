@@ -184,6 +184,17 @@ class BackendStack(Stack):
         root_resource_api = self.api.root.add_resource("api")
         root_resource_v1 = root_resource_api.add_resource("v1")
 
+        # Endpoints for automatic Swagger docs (no auth required)
+        root_resource_docs: aws_apigw.Resource = root_resource_v1.add_resource(
+            "docs",
+            default_method_options=aws_apigw.MethodOptions(api_key_required=False),
+        )
+        root_resource_docs_proxy = root_resource_docs.add_resource(
+            "{path}",
+            default_method_options=aws_apigw.MethodOptions(api_key_required=False),
+        )
+
+        # Endpoints for "todos"resources
         root_resource_todos = root_resource_v1.add_resource("todos")
         todos_resource = root_resource_todos.add_resource("{todo_id}")
 
@@ -196,3 +207,9 @@ class BackendStack(Stack):
 
         # API-Path: "/api/v1/todos/{todo_id}"
         todos_resource.add_method("GET", api_lambda_integration_todos)
+
+        # API-Path: "/api/v1/docs"
+        root_resource_docs.add_method("GET", api_lambda_integration_todos)
+
+        # API-Path: "/api/v1/docs/openapi.json
+        root_resource_docs_proxy.add_method("GET", api_lambda_integration_todos)
