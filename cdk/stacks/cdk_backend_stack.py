@@ -47,7 +47,8 @@ class BackendStack(Stack):
         self.create_lambda_layers()
         self.create_lambda_functions()
         self.create_rest_api()
-        self.configure_rest_api()
+        self.configure_rest_api_simple()  # --> Simple example usage of REST-API (proxy)
+        # self.configure_rest_api_advanced()  # --> Advanced example usage of REST-API (paths)
 
     def create_dynamodb_table(self):
         """
@@ -175,9 +176,9 @@ class BackendStack(Stack):
         )
         usage_plan.add_api_key(rest_api_key)
 
-    def configure_rest_api(self):
+    def configure_rest_api_advanced(self):
         """
-        Method to configure the REST-API Gateway with resources and methods.
+        Method to configure the REST-API Gateway with resources and methods (advanced way).
         """
 
         # Define REST-API resources
@@ -213,3 +214,36 @@ class BackendStack(Stack):
 
         # API-Path: "/api/v1/docs/openapi.json
         root_resource_docs_proxy.add_method("GET", api_lambda_integration_todos)
+
+    def configure_rest_api_simple(self):
+        """
+        Method to configure the REST-API Gateway with resources and methods (simple way).
+        """
+
+        # Define REST-API resources
+        root_resource_api = self.api.root.add_resource("api")
+        root_resource_v1 = root_resource_api.add_resource("v1")
+
+        # Endpoints ("docs" without auth and "todos" with auth)
+        root_resource_docs: aws_apigw.Resource = root_resource_v1.add_resource(
+            "docs",
+            default_method_options=aws_apigw.MethodOptions(api_key_required=False),
+        )
+        root_resource_todos = root_resource_v1.add_resource("todos")
+
+        # Define all API-Lambda integrations for the API methods
+        api_lambda_integration_todos = aws_apigw.LambdaIntegration(self.lambda_todo_app)
+
+        # Enable proxies for the "/api/v1/docs" endpoints
+        root_resource_docs.add_method("GET", api_lambda_integration_todos)
+        root_resource_docs.add_proxy(
+            any_method=True,  # To don't explicitly adding methods on the `proxy` resource
+            default_integration=api_lambda_integration_todos,
+        )
+
+        # Enable proxies for the "/api/v1/todos" endpoints
+        root_resource_todos.add_method("GET", api_lambda_integration_todos)
+        root_resource_todos.add_proxy(
+            any_method=True,  # To don't explicitly adding methods on the `proxy` resource
+            default_integration=api_lambda_integration_todos,
+        )
