@@ -243,6 +243,7 @@ class BackendStack(Stack):
 
         # Enable proxies for the "/api/v1/todos" endpoints
         root_resource_todos.add_method("GET", api_lambda_integration_todos)
+        root_resource_todos.add_method("POST", api_lambda_integration_todos)
         root_resource_todos.add_proxy(
             any_method=True,  # To don't explicitly adding methods on the `proxy` resource
             default_integration=api_lambda_integration_todos,
