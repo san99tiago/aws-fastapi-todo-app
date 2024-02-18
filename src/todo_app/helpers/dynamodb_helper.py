@@ -29,7 +29,7 @@ class DynamoDBHelper:
         :param sort_key (str): sort key value.
         """
         logger.info(
-            f"Starting get_item_by_pk_and_sk with"
+            f"Starting get_item_by_pk_and_sk with "
             f"pk: ({partition_key}) and sk: ({sort_key})"
         )
 
@@ -69,7 +69,7 @@ class DynamoDBHelper:
         :param sort_key_portion (str): sort key portion to use in query.
         """
         logger.info(
-            f"Starting query_by_pk_and_sk_begins_with with"
+            f"Starting query_by_pk_and_sk_begins_with with "
             f"pk: ({partition_key}) and sk: ({sort_key_portion})"
         )
 
@@ -133,3 +133,58 @@ class DynamoDBHelper:
                 f"error: {error}."
             )
             raise error
+
+    def update_item(
+        self, partition_key: str, sort_key: str, data_attributes_only: dict
+    ) -> dict:
+        """
+        Method to update an existing item in a "patch" fashion (only deltas).
+        :param partition_key (str): partition key value.
+        :param sort_key (str): sort key value.
+        :param data_attributes_only (dict): Item's data attributes to be updated in the format of name/value pairs.
+        """
+
+        logger.info("Starting update_item operation.")
+        logger.debug(
+            f"pk: {partition_key}, sk: {sort_key} data: {data_attributes_only}"
+        )
+
+        try:
+            primary_key_dict = {
+                "PK": partition_key,
+                "SK": sort_key,
+            }
+            a, v = self._get_update_params(data_attributes_only)
+            response = self.table.update_item(
+                Key=primary_key_dict,
+                UpdateExpression=a,
+                ExpressionAttributeValues=dict(v),
+            )
+            logger.info(response)
+            return response
+        except ClientError as error:
+            logger.error(
+                f"put_item operation failed for: "
+                f"table_name: {self.table_name}."
+                f"pk: {partition_key}."
+                f"sk: {sort_key}."
+                f"data_attributes_only: {data_attributes_only}."
+                f"error: {error}."
+            )
+            raise error
+
+    def _get_update_params(self, payload: dict):
+        """
+        Given a dictionary we generate an update expression and a dict of values
+        to update a dynamodb table.
+
+        :payload (dict): Parameters to use for formatting.
+        """
+        update_expression = ["set "]
+        update_values = dict()
+
+        for key, val in payload.items():
+            update_expression.append(f" {key} = :{key},")
+            update_values[f":{key}"] = val
+
+        return "".join(update_expression)[:-1], update_values

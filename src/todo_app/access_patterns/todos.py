@@ -4,6 +4,7 @@ from datetime import datetime
 from typing import Optional
 
 # External imports
+from fastapi import HTTPException
 from ulid import ULID
 from aws_lambda_powertools import Logger
 
@@ -11,7 +12,7 @@ from aws_lambda_powertools import Logger
 from todo_app.common.logger import custom_logger
 from todo_app.helpers.dynamodb_helper import DynamoDBHelper
 from todo_app.common.enums import DDBPrefixes
-from todo_app.models.todos import TodoModel
+from todo_app.models.todos import TodoModel, TodoModelUpdates
 
 # Initialize DynamoDB helper for item's abstraction
 DYNAMODB_TABLE = os.environ.get("DYNAMODB_TABLE")
@@ -59,7 +60,7 @@ class Todos:
             sort_key=f"TODO#{ulid}",
         )
 
-        formatted_todo = TodoModel.from_dynamodb_item(result) if result else result
+        formatted_todo = TodoModel.from_dynamodb_item(result) if result else {}
         self.logger.debug(formatted_todo)
         return formatted_todo
 
@@ -82,4 +83,38 @@ class Todos:
         if result.get("ResponseMetadata", {}).get("HTTPStatusCode") == 200:
             return todo
 
-        return result
+        return {}
+
+    def patch_todo(self, ulid: str, todo_data: dict) -> Optional[TodoModel]:
+        """
+        Method to patch an existing TODO item.
+        :param ulid (str): ULID for a specific TODO item.
+        :param todo_data (dict): Data for the new TODO item.
+        """
+
+        # Validate that TODO item exists
+        existing_todo_item = self.get_todo_by_ulid(ulid)
+        if not existing_todo_item:
+            self.logger.error(
+                f"patch_todo failed due to non-existing TODO item to update: {ulid}"
+            )
+            raise HTTPException(
+                status_code=400,
+                detail=f"TODO patch request for ULID {ulid} "
+                "is not valid because item does not exist",
+            )
+
+        current_time = datetime.now().isoformat()
+        todo_data["updated_at"] = current_time
+
+        result = dynamodb_helper.update_item(
+            partition_key=self.partition_key,
+            sort_key=f"TODO#{ulid}",
+            data_attributes_only=todo_data,
+        )
+        self.logger.debug(result)
+
+        if result.get("ResponseMetadata", {}).get("HTTPStatusCode") == 200:
+            return self.get_todo_by_ulid(ulid)
+
+        return {}

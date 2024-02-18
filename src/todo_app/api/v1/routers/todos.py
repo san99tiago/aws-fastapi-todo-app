@@ -73,9 +73,9 @@ async def create_todo(
         logger.append_keys(correlation_id=correlation_id, user_email=user_email)
 
         # Validate payload with JSON-Schema
-        users_schema = Schema(JSONSchemaType.TODOS, logger=logger).get_schema()
+        todos_schema = Schema(JSONSchemaType.TODOS, logger=logger).get_schema()
         validation_result = validate_json(
-            data=todo_details, json_schema=users_schema, logger=logger
+            data=todo_details, json_schema=todos_schema, logger=logger
         )
         if isinstance(validation_result, Exception):
             raise SchemaValidationException(todo_details, validation_result)
@@ -90,4 +90,37 @@ async def create_todo(
 
     except Exception as e:
         logger.error(f"Error in create_todo(): {e}")
+        raise e
+
+
+@router.patch("/todos/{todo_id}", tags=["todos"])
+async def patch_todo_item(
+    user_email: str,
+    todo_id: str,
+    todo_details: dict,
+    correlation_id: Annotated[str | None, Header()] = uuid4(),
+):
+    try:
+        logger.append_keys(correlation_id=correlation_id, user_email=user_email)
+        logger.info("Starting todos handler for patch_todo_item()")
+
+        # Validate payload with JSON-Schema
+        todos_schema = Schema(JSONSchemaType.TODOS, logger=logger).get_schema()
+        todos_schema.pop(
+            "required", None
+        )  # For patch, do not enforce mandatory fields in schema
+        validation_result = validate_json(
+            data=todo_details, json_schema=todos_schema, logger=logger
+        )
+        if isinstance(validation_result, Exception):
+            raise SchemaValidationException(todo_details, validation_result)
+
+        todo = Todos(user_email=user_email, logger=logger)
+        result = todo.patch_todo(ulid=todo_id, todo_data=todo_details)
+
+        logger.info("Finished patch_todo_item() successfully")
+        return result
+
+    except Exception as e:
+        logger.error(f"Error in patch_todo_item(): {e}")
         raise e
