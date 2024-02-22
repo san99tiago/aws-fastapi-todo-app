@@ -124,3 +124,24 @@ async def patch_todo_item(
     except Exception as e:
         logger.error(f"Error in patch_todo_item(): {e}")
         raise e
+
+
+@router.delete("/todos/{todo_id}", tags=["todos"])
+async def delete_todo_item(
+    user_email: str,
+    todo_id: str,
+    correlation_id: Annotated[str | None, Header()] = uuid4(),
+):
+    try:
+        logger.append_keys(correlation_id=correlation_id, user_email=user_email)
+        logger.info("Starting todos handler for delete_todo_item()")
+
+        todo = Todos(user_email=user_email, logger=logger)
+        result = todo.delete_todo(ulid=todo_id)
+
+        logger.info("Finished delete_todo_item() successfully")
+        return result
+
+    except Exception as e:
+        logger.error(f"Error in delete_todo_item(): {e}")
+        raise e

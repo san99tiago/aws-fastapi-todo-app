@@ -188,3 +188,31 @@ class DynamoDBHelper:
             update_values[f":{key}"] = val
 
         return "".join(update_expression)[:-1], update_values
+
+    def delete_item(self, partition_key: str, sort_key: str) -> dict:
+        """
+        Method to delete an existing item in DynamoDB
+        :param partition_key (str): partition key value.
+        :param sort_key (str): sort key value.
+        """
+
+        logger.info("Starting delete_item operation.")
+        logger.debug(f"pk: {partition_key}, sk: {sort_key}")
+
+        try:
+            primary_key_dict = {
+                "PK": partition_key,
+                "SK": sort_key,
+            }
+            response = self.table.delete_item(Key=primary_key_dict)
+            logger.info(response)
+            return response
+        except ClientError as error:
+            logger.error(
+                f"put_item operation failed for: "
+                f"table_name: {self.table_name}."
+                f"pk: {partition_key}."
+                f"sk: {sort_key}."
+                f"error: {error}."
+            )
+            raise error

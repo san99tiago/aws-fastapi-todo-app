@@ -118,3 +118,30 @@ class Todos:
             return self.get_todo_by_ulid(ulid)
 
         return {}
+
+    def delete_todo(self, ulid: str) -> Optional[TodoModel]:
+        """
+        Method to delete an existing TODO item.
+        :param ulid (str): ULID for a specific TODO item.
+        :param todo_data (dict): Data for the new TODO item.
+        """
+
+        # Validate that TODO item exists
+        existing_todo_item = self.get_todo_by_ulid(ulid)
+        if not existing_todo_item:
+            self.logger.error(
+                f"delete_todo failed due to non-existing TODO item to delete: {ulid}"
+            )
+            raise HTTPException(
+                status_code=400,
+                detail=f"TODO delete request for ULID {ulid} "
+                "is not valid because item does not exist",
+            )
+
+        result = dynamodb_helper.delete_item(
+            partition_key=self.partition_key,
+            sort_key=f"TODO#{ulid}",
+        )
+        self.logger.debug(result)
+
+        return {}
