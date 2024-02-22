@@ -1,7 +1,5 @@
 # 🎺 AWS-FASTAPI-TODO-APP 🎺
 
-TODO: Add architecture image.
-
 ## Overview 🔮
 
 This is a TODO app example for a REST-API deployed on AWS with the following specifications:
@@ -11,6 +9,8 @@ This is a TODO app example for a REST-API deployed on AWS with the following spe
 - API Framework with [FastAPI](https://fastapi.tiangolo.com)
 - Tests with [PyTest Framework](https://docs.pytest.org/)
 - Dependencies and Environments managed with [Python Poetry](https://python-poetry.org)
+
+<img src="assets/aws_fastapi_todo_app.png" width=90%> <br>
 
 This project was created to show how to easily deploy a REST-API on AWS by leveraging one of the fastest Python frameworks in the market, FastAPI, while still gaining the power or AWS serverless tools, such as API-Gateway, Lambda Functions, DynamoDB, Cognito and more!
 
