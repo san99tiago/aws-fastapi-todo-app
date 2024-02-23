@@ -63,7 +63,7 @@ async def read_todo_item(
 
 
 @router.post("/todos", tags=["todos"])
-async def create_todo(
+async def create_todo_item(
     todo_details: dict,
     correlation_id: Annotated[str | None, Header()] = uuid4(),
 ):
@@ -79,17 +79,17 @@ async def create_todo(
         )
         if isinstance(validation_result, Exception):
             raise SchemaValidationException(todo_details, validation_result)
-        logger.info("Starting todos handler for create_todo()")
+        logger.info("Starting todos handler for create_todo_item()")
 
         # After schema validation, it's safe to load the TODO element
         todos = Todos(user_email=user_email, logger=logger)
-        result = todos.create_todo(todo_details)
+        result = todos.create_todo_item(todo_details)
 
-        logger.info("Finished create_todo() successfully")
+        logger.info("Finished create_todo_item() successfully")
         return result
 
     except Exception as e:
-        logger.error(f"Error in create_todo(): {e}")
+        logger.error(f"Error in create_todo_item(): {e}")
         raise e
 
 
